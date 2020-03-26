@@ -1,15 +1,20 @@
 #!/bin/bash
 
+source ./vars.sh
+
 #stop the containers if they are running
-docker stop mysql-server_c
-docker stop nginx-server_c
+docker stop $DATABASE_CONTAINER_NAME
+docker stop $WEB_CONTAINER_NAME
 
-#delete the containers if they are running
-docker rm mysql-server_c
-docker rm nginx-server_c
+#delete the containers
+docker rm $DATABASE_CONTAINER_NAME
+docker rm $WEB_CONTAINER_NAME
 
-#delete the images if they are running
-docker rmi mysql-server_i
-docker rmi nginx-server_i
+#delete the images
+docker rmi $DATABASE_IMAGE_NAME
+docker rmi $WEB_IMAGE_NAME
+docker rmi $DATABASE_STRIPPED_IMAGE_NAME
+docker rmi $WEB_STRIPPED_IMAGE_NAME
 
-docker network rm iss-cw3_net
+#delete the network
+docker network rm $NETWORK_NAME

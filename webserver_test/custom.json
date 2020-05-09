@@ -143,14 +143,14 @@
                         "action": "SCMP_ACT_ALLOW",
                         "args": []
                 },
-		{
-                        "name": "getdents",
-                        "action": "SCMP_ACT_ALLOW",
-                        "args": []
-                },
 
                 {
                         "name": "getegid",
+                        "action": "SCMP_ACT_ALLOW",
+                        "args": []
+                },
+		{
+                        "name": "getgid",
                         "action": "SCMP_ACT_ALLOW",
                         "args": []
                 },
@@ -160,9 +160,25 @@
                         "action": "SCMP_ACT_ALLOW",
                         "args": []
                 },
+                {
+                        "name": "getpgrp",
+                        "action": "SCMP_ACT_ALLOW",
+                        "args": []
+                },
 
                 {
                         "name": "getppid",
+                        "action": "SCMP_ACT_ALLOW",
+                        "args": []
+                },
+  
+                {
+                        "name": "waitpid",
+                        "action": "SCMP_ACT_ALLOW",
+                        "args": []
+                },
+                {
+                        "name": "syscall",
                         "action": "SCMP_ACT_ALLOW",
                         "args": []
                 },
@@ -178,7 +194,11 @@
                         "action": "SCMP_ACT_ALLOW",
                         "args": []
                 },
-
+                {
+                        "name": "chown",
+                        "action": "SCMP_ACT_ALLOW",
+                        "args": []
+                },
                 {
                         "name": "getuid",
                         "action": "SCMP_ACT_ALLOW",
@@ -205,6 +225,11 @@
 
                 {
                         "name": "mmap",
+                        "action": "SCMP_ACT_ALLOW",
+                        "args": []
+                },
+                {
+                        "name": "listen",
                         "action": "SCMP_ACT_ALLOW",
                         "args": []
                 },
@@ -241,6 +266,11 @@
 
                 {
                         "name": "pread64",
+                        "action": "SCMP_ACT_ALLOW",
+                        "args": []
+                },
+                {
+                        "name": "pwrite64",
                         "action": "SCMP_ACT_ALLOW",
                         "args": []
                 },
@@ -372,14 +402,7 @@
 		{
 			"name": "clone",
 			"action": "SCMP_ACT_ALLOW",
-			"args": [
-				{
-					"index": 0,
-					"value": 2080505856,
-					"valueTwo": 0,
-					"op": "SCMP_CMP_MASKED_EQ"
-				}
-			]
+			"args": []
 		}
 	]
 }

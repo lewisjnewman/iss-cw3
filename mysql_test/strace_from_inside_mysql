@@ -1,0 +1,129 @@
+------strace mysql - inside msql container
+root@database:/# strace -c -f -S name mysql 2>&1 1>/dev/null | tail -n +3 | head -n -2 | awk '{print $(NF)}'
+----------------
+access
+arch_prctl
+brk
+close
+connect
+dup
+execve
+fstat
+futex
+getdents64
+geteuid
+getpid
+ioctl
+mmap
+mprotect
+munmap
+openat
+prlimit64
+read
+recvfrom
+rt_sigaction
+rt_sigprocmask
+sendto
+set_robust_list
+set_tid_address
+setsockopt
+shutdown -> hmmm
+socket
+stat
+sysinfo
+write
+root@database:/# 
+
+
+
+------strace mysqld - inside mysql container
+root@database:/# strace -c -f -S name mysqld 2>&1 1>/dev/null | tail -n +3 | head -n -2 | awk '{print $(NF)}'
+root!
+
+Aborting
+
+end
+complete
+
+syscall
+----------------
+access
+arch_prctl
+brk
+close
+execve
+fstat
+futex
+getdents64
+geteuid
+getpid
+gettid
+lseek
+lstat
+mmap
+mprotect
+munmap
+openat
+prlimit64
+read
+rt_sigaction
+rt_sigprocmask
+sched_getaffinity
+set_robust_list
+set_tid_address
+stat
+times
+umask
+uname
+unlink
+write
+root@database:/# 
+
+------strace docker when it starts to use see the syscalls used
+[csc@localhost mysql]$ strace -c -S name docker run -d --net iss-cw3_net --ip 192.0.2.3 --hostname database -e MYSQL_ROOT_PASSWORD="test" -e MYSQL_DATABASE="data" --security-opt seccomp:minimal.json --name mysql-server_c 31d7bb000b87
+fc355d067eac08c45c8a7d08efc69a7713735cafccfe004b52c00d5bca1ee53d
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+  0.00    0.000000           0         1         1 access
+  0.07    0.000003           3         1           arch_prctl
+  0.32    0.000014           4         4           brk
+  1.55    0.000067          13         5           clone
+  0.65    0.000028           2        14           close
+ 24.60    0.001066         267         4         2 connect
+  0.00    0.000000           0         1           epoll_create1
+  0.35    0.000015           2         8         2 epoll_ctl
+ 10.36    0.000449          45        10           epoll_wait
+  0.00    0.000000           0         1           execve
+  0.02    0.000001           0         4           fcntl
+  0.42    0.000018           2        10           fstat
+ 18.92    0.000820          14        60        10 futex
+  0.09    0.000004           2         2           getpeername
+  0.02    0.000001           1         1           getpid
+  0.21    0.000009           9         1           getrandom
+  0.07    0.000003           3         1           getrlimit
+  0.12    0.000005           3         2           getsockname
+  0.00    0.000000           0         1           gettid
+  0.00    0.000000           0         1           getuid
+  0.00    0.000000           0         2           ioctl
+ 10.39    0.000450           9        49           mmap
+  4.73    0.000205          12        17           mprotect
+  4.29    0.000186          37         5           munmap
+  3.39    0.000147          16         9           open
+  1.43    0.000062          21         3           openat
+  1.92    0.000083          42         2           pselect6
+ 11.35    0.000492          27        18         3 read
+  0.00    0.000000           0         1           readlinkat
+  1.02    0.000044           0       120           rt_sigaction
+  0.67    0.000029           2        13           rt_sigprocmask
+  0.21    0.000009           9         1           sched_getaffinity
+  0.12    0.000005           5         1           sched_yield
+  0.07    0.000003           3         1           set_robust_list
+  0.07    0.000003           3         1           set_tid_address
+  0.05    0.000002           1         2           setsockopt
+  0.00    0.000000           0         2           sigaltstack
+  1.04    0.000045          11         4           socket
+  1.38    0.000060           2        25        24 stat
+  0.12    0.000005           3         2           write
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.004333                   410        42 total
+

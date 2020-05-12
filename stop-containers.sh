@@ -8,4 +8,3 @@ docker rm database_c
 docker stop nginx_server_c
 docker rm nginx_server_c
 
-docker network rm iss-cw3_net

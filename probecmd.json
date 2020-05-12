@@ -1,0 +1,17 @@
+{
+  "commands":
+  [
+   {
+     "protocol": "http",
+     "method": "GET",
+     "resource": "/index.php"
+   },
+   {
+     "protocol": "http",
+     "method": "POST",
+     "resource": "/action.php",
+     "body": "username=test&comment=this+is+a+test"
+   }
+  ]
+}
+

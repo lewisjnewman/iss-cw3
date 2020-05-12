@@ -1,7 +1,0 @@
-# ISS CW3 Database Dockerfile
-
-FROM mysql:5
-
-COPY configfiles/mysqld.cnf  /mysql/mysql.conf.d/mysqld.cnf
-
-EXPOSE 3306

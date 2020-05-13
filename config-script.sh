@@ -3,7 +3,7 @@
 docker network create --subnet=192.0.2.0/24 iss-cw3_net
 
 #create docker volume for persistant database data
-docker volume create --name database-volume
+docker volume create --name database_volume
 
 #create and run the database container
 docker run -d  -v database_volume:/var/lib/mysql/ --net iss-cw3_net --ip 192.0.2.3 --hostname database -e MYSQL_ROOT_PASSWORD="test" -e MYSQL_DATABASE="data" --name database_c database_si

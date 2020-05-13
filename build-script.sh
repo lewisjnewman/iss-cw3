@@ -11,5 +11,5 @@ docker build webserver --tag nginx_server_i
 
 
 #slim the mysql container
-./docker-slim/docker-slim build --target database_i --http-probe=false --tag database_si --include-path='/var/lib/mysql-files' --include-path='/var/lib/mysql' --include-path='/var/run/mysqld/' --include-exe='mysql'
+./docker-slim/docker-slim build --target database_i --http-probe=false --tag database_si --include-path='/var/lib/mysql-files' --include-path='/var/lib/mysql' --include-path='/var/run/mysqld/' --include-exe='mysql' --include-exe='ls' --include-exe='sleep' --include-exe='sed' --include-exe='awk' --include-path='/docker-entrypoint-initdb.d' --include-exe='mysql_tzinfo_to_sql' --include-exe='cat' --include-exe='mysqladmin'
 

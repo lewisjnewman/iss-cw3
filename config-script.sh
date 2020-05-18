@@ -17,3 +17,4 @@ docker exec -i database_c mysql -uroot -ptest data < ./mysql/sqlconfig/data.sql
 #stop and remove the temporary mysql container
 docker stop database_c
 docker rm database_c
+

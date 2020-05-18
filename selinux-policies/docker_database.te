@@ -1,10 +1,5 @@
-policy_module(docker_database,0.4)
-# derived from:
-#   Original material from James Dorgan
-#   https://opensource.com/business/15/3/docker-security-tuning
+policy_module(docker_database,0.10)
 
-# This template interface creates the docker_chat_t type as a
-# type which can be run as a docker container. 
 virt_sandbox_domain_template(docker_database);
 
 require {
@@ -13,16 +8,14 @@ require {
     type sysfs_t;
 }
 
-################# put audit2allow rules in here ##############
-
 allow docker_database_t mysqld_port_t:tcp_socket name_bind;
 allow docker_database_t node_t:tcp_socket node_bind;
 allow docker_database_t self:capability { dac_override setgid setuid };
 allow docker_database_t self:tcp_socket { accept bind create getattr listen setopt shutdown };
 allow docker_database_t sysfs_t:file { open read };
+allow docker_database_t self:tcp_socket { read write };
+allow docker_database_t sysfs_t:dir read;
+allow docker_database_t sysfs_t:file getattr;
 
-################# end audit2allow additions ##################
 
-# Permissive domains allow processes to not be blocked by SELinux
-# Remove this rule, when you are confident in the policy.
-permissive docker_database_t;
+#permissive docker_database_t;

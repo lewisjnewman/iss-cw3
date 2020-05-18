@@ -9,7 +9,7 @@ docker volume create --name database_volume
 docker run -d  -v database_volume:/var/lib/mysql/ --net iss-cw3_net --ip 192.0.2.3 --hostname database -e MYSQL_ROOT_PASSWORD="test" -e MYSQL_DATABASE="data" --name database_c database_si
 
 #10 second sleep so that the following command works
-sleep 10
+sleep 20
 
 #setup the database
 docker exec -i database_c mysql -uroot -ptest data < ../runs/mysql/data.sql

@@ -1,4 +1,4 @@
-policy_module(docker_database,0.10)
+policy_module(docker_database,1.0)
 
 virt_sandbox_domain_template(docker_database);
 
@@ -6,6 +6,7 @@ require {
     type mysqld_port_t;
     type node_t;
     type sysfs_t;
+    type container_runtime_t;
 }
 
 allow docker_database_t mysqld_port_t:tcp_socket name_bind;
@@ -17,5 +18,6 @@ allow docker_database_t self:tcp_socket { read write };
 allow docker_database_t sysfs_t:dir read;
 allow docker_database_t sysfs_t:file getattr;
 
+allow container_runtime_t docker_database_t:process2 nnp_transition;
 
 #permissive docker_database_t;

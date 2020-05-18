@@ -19,7 +19,7 @@ docker stop database_c
 docker rm database_c
 
 #change into the mysql directory to build the selinux policy
-cd ../mysql
+cd ../runs/mysql
 
 #build and apply the database policy
 make -f /usr/share/selinux/devel/Makefile docker_database.pp

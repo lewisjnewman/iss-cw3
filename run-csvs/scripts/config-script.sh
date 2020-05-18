@@ -12,7 +12,7 @@ docker run -d  -v database_volume:/var/lib/mysql/ --net iss-cw3_net --ip 192.0.2
 sleep 10
 
 #setup the database
-docker exec -i database_c mysql -uroot -ptest data < ./mysql/sqlconfig/data.sql
+docker exec -i database_c mysql -uroot -ptest data < ../runs/mysql/data.sql
 
 #stop and remove the temporary mysql container
 docker stop database_c

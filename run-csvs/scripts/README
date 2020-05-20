@@ -1,71 +1,122 @@
 # University of Warwick - ISS CW3 20/05/2020
-# This file contains the steps and decisions made for creating the run scripts for Seccomp and SELinux
-# Seccomp created by Florin Vanvu (1829321)
-# SELinux created by Lewis Newman (1824952)
 
-----Seccomp
-# Strace was the tool used for finding the system calls that the containers and the services from inside the containers execute when they are running
-# The list of references used can be found at the bottom of the file profiles for each service
-# While working on intercepting the syscalls the “dockerfile” for both services were changed for installing strace on the containers (yum install strace and apt-get install strace), but these were deleted from the dockerfiles once the system calls were found.
+This file contains the steps and decisions made for creating the run and config scripts for Seccomp and SELinux  
 
------ Seccomp Webserver 
-# Firstly, the syscalls for the webserver where found by stracing the services running on the container
-# Command used for running the container
-### docker run -it --entrypoint /bin/bash --net iss-cw3_net --ip 192.0.2.10 --hostname webserver --add-host database:192.0.2.3 -p 80:80 --security-opt seccomp=unconfined --security-opt=no-new-privileges --security-opt apparmor=unconfined --privileged --cap-add=SYS_PTRACE --name nginx-server_c <image_id>
-# Secondly, from inside the container two strace commands were used for finding the system calls executed by "nginx", "php" and "php-fpm"
-# Commands for strace 
-### strace -c -F nginx 
-### strace -c -F php
-### strace -c -f php-fpm -F
-# While the commands were running, I was interacting with the container by using the webpage (localhoast/index.php) for getting a list of system calls that are needed for when the user is adding data into the webpage form.
-# Thirdly, I used strace from outside the container for getting a list of the system calls that are executed when the docker container starts.
-# Command 
-### strace -c -F -S name docker run .... 
-# Once the all the system calls were added to the json profile, the container was tested with this one, but the container was crashing immediately, sign that some system calls are missing for strating the container.
-# Some of the missing system calls were: "capget", "capset", "exit", "exit_group", "fchown"
-# After adding the missing system calls the webserver container was tested using the run command, but removing the --privileged flag
-# Command for testing the seccomp 
-###docker run -d --net iss-cw3_net --ip 192.0.2.10 --hostname webserver --add-host database:192.0.2.3 -p 80:80 --security-opt seccomp=seccomp.json --security-opt=no-new-privileges --security-opt apparmor=unconfined --name nginx-server_c <image_id>
+Seccomp created by Florin Vanvu (1829321)  
+SELinux and Extra bits created by Lewis Newman (1824952)
 
------ Seccomp Mysql 
-# For the mysql container there were two main services that needed to be straced "mysql" and "mysqld", but stracing only these two would not provide a full list of system calls needed
-# For getting a full list of system calls, I had to interact with the database from multiple perspective.
-# First of all, I ran the container with the following command 
-##### docker run -d --net iss-cw3_net --ip 192.0.2.3 --hostname database -e MYSQL_ROOT_PASSWORD="test" -e MYSQL_DATABASE="data" --security-opt seccomp=unconfined --security-opt=no-new-privileges --security-opt apparmor=unconfined --privileged --cap-add=SYS_PTRACE --name mysql-server_c <image_id>
-# Secondly, I execute the second command for mysql accompanied by strace for checking the system calls needed for it
-##### strace -c -F -S name docker exec -i mysql-server_c mysql -uroot -ptest data < sqlconfig/data.sql
-# Next, I executed the command for getting a shell inside the container 
-#### docker exec -it <container_name> /bin/bash
-# I used the strace command from inside docker 
-#### strace -c -F mysql
-#### strace -c -f mysqld -F
-# After that I kept on interacting with the database while using strace
-# Command used
-#### strace -c -F mysql -uroot -ptest -> this command got me inside the database, I managed to navigate through it for getting more system calls
-# Now from the webserver I used the next command for getting inside the database remotely and navigate through it
-#### strace -c -F mysql -uroot -ptest -h 192.0.2.3
-# Lastly, I accessed the webpage via the browser and inputted some data in the forms provided for getting more system calls
-# Once that was done, I added all the system calls to the .json profile
-# When testing the container with the new seccomp profile, the container was crashing, which means that some system calls were missing 
-# I added the extra system calls which were needed for the docker container to run and after the container was running without any problems.
-#Command used
-#### docker run -d --net iss-cw3_net --ip 192.0.2.10 --hostname webserver --add-host database:192.0.2.3 -p 80:80 -v database_volume:/var/lib/mysql/ --security-opt seccomp=seccomp.json --security-opt=no-new-privileges --security-opt apparmor=unconfined --name nginx-server_c <nginx image name>
+## Instructions for running
 
-#References seccomp
-#Aaron Killi 2017, 10 Strace Commands for Troubleshooting the Debugging Linux Process, TecMint, viewed 05/05/2020 <https://www.tecmint.com/strace-commands-for-troubleshooting-and-debugging-linux/>
-#jpallen 2016, Docker fails to start container if certain syscalls are restricted by seccomp, GitHub, viewed 10/05/2020 <https://github.com/moby/moby/issues/22252>
-#ihac 2017, Unable to get the complete syscall list of container, GitHub, viewed 12/05/2020 <https://github.com/draios/sysdig/issues/840>
-#Andreas Jaekel 2019, Filtering System Calls in Docker and Kubernetes, jax LONDON, viewed 15/05/2020 <https://jaxlondon.com/wp-content/uploads/2019/11/Security_-_Filtering_System_Calls_in_Docker_and_Kubernetes.pdf
+**In order for the config-script to compile and load SELinux policies, The script should be run as root**
 
+## Extra bits
 
+### Docker Volume
 
+In order to provide persistent storage of data in the database between different copies of the database a docker volume is created and mounted to /var/lib/mysql in the config script. This means that when the container is destroyed the database itself is maintained in the volume and if the container was recreated and mounted the same volume to the same place then all the data in the database would be in the new container.
 
+### No-New-Privileges
 
+Docker and the underlying container technology runc provided an option known as no new privileges. This is enabled by adding the following flag to the docker run command.  
+`--security-opt no-new-privileges`
 
+The no new privileges flag prevents a process from changing it's uid/gid, gaining new capabilities or when SELinux, is installed changing it's process label to a process type with higher privileges. This also has a side effect of meaning that the seccomp profile is applied slightly later in the process meaning a few system calls can sometimes be removed from the seccomp profile
 
+## Seccomp
 
+Strace was the tool used for finding the system calls that the containers and the services from inside the containers execute when they are running  
 
+The list of references used can be found at the bottom of the file profiles for each service  
 
+While working on intercepting the syscalls the dockerfile for both services were changed for installing strace on the containers (yum install strace and apt-get install strace), but these were deleted from the dockerfiles once the system calls were found.  
 
+### Seccomp Webserver
 
+Firstly, the syscalls for the webserver where found by stracing the services running on the container  
 
+Command used for running the container  
+`docker run -it --entrypoint /bin/bash --net iss-cw3_net --ip 192.0.2.10 --hostname webserver --add-host database:192.0.2.3 -p 80:80 --security-opt seccomp=unconfined --security-opt=no-new-privileges --security-opt apparmor=unconfined --privileged --cap-add=SYS_PTRACE --name nginx-server_c <image_id>`
+
+Secondly, from inside the container two strace commands were used for finding the system calls executed by "nginx", "php" and "php-fpm"  
+
+Commands for strace  
+`strace -c -F nginx`  
+`strace -c -F php`  
+`strace -c -f php-fpm -F`  
+
+While the commands were running, I was interacting with the container by using the webpage (localhoast/index.php) for getting a list of system calls that are needed for when the user is adding data into the webpage form.  
+
+Thirdly, I used strace from outside the container for getting a list of the system calls that are executed when the docker container starts.  
+
+Command  
+`strace -c -F -S name docker run ....`  
+
+Once the all the system calls were added to the json profile, the container was tested with this one, but the container was crashing immediately, sign that some system calls are missing for stracing the container. Some of the missing system calls were: "capget", "capset", "exit", "exit_group", "fchown" After adding the missing system calls the webserver container was tested using the run command, but removing the --privileged flag.  
+
+Command for testing the seccomp  
+`docker run -d --net iss-cw3_net --ip 192.0.2.10 --hostname webserver --add-host database:192.0.2.3 -p 80:80 --security-opt seccomp=seccomp.json --security-opt=no-new-privileges --security-opt apparmor=unconfined --name nginx-server_c <image_id>`
+
+## No new privileges
+
+### Seccomp Mysql
+
+For the mysql container there were two main services that needed to be straced "mysql" and "mysqld", but stracing only these two would not provide a full list of system calls needed. For getting a full list of system calls, I had to interact with the database from multiple perspective.  
+First of all, I ran the container with the following command  
+`docker run -d --net iss-cw3_net --ip 192.0.2.3 --hostname database -e MYSQL_ROOT_PASSWORD="test" -e MYSQL_DATABASE="data" --security-opt seccomp=unconfined --security-opt=no-new-privileges --security-opt apparmor=unconfined --privileged --cap-add=SYS_PTRACE --name mysql-server_c <image_id>`  
+
+Secondly, I execute the second command for mysql accompanied by strace for checking the system calls needed for it  
+`strace -c -F -S name docker exec -i mysql-server_c mysql -uroot -ptest data < sqlconfig/data.sql`  
+
+Next, I executed the command for getting a shell inside the container  
+`docker exec -it <container_name> /bin/bash`  
+
+I used the strace command from inside docker  
+`strace -c -F mysql`  
+`strace -c -f mysqld -F`  
+
+After that I kept on interacting with the database while using strace
+Command used  
+`strace -c -F mysql -uroot -ptest` -> this command got me inside the database, I managed to navigate through it for getting more system calls  
+
+Now from the webserver I used the next command for getting inside the database remotely and navigate through it
+`strace -c -F mysql -uroot -ptest -h 192.0.2.3`
+
+Lastly, I accessed the webpage via the browser and inputted some data in the forms provided for getting more system calls
+Once that was done, I added all the system calls to the .json profile  
+When testing the container with the new seccomp profile, the container was crashing, which means that some system calls were missing  
+I added the extra system calls which were needed for the docker container to run and after the container was running without any problems.
+
+Command used  
+`docker run -d --net iss-cw3_net --ip 192.0.2.10 --hostname webserver --add-host database:192.0.2.3 -p 80:80 -v database_volume:/var/lib/mysql/ --security-opt seccomp=seccomp.json --security-opt=no-new-privileges --security-opt apparmor=unconfined --name nginx-server_c <nginx image name>`  
+
+## SELinux
+
+In order to facilitate the creation of the SELinux policies 2 blank policies were created that included 2 new types in them `docker_mysql_t` and `docker_webserver_t` to represent the 2 containers that we are running. The 2 blank policies were set to be permissive such that SELinux did not stop policy violations by the types but did log them to the audit file. Both containers were run together and the same time and then were used in the normal way such that SELinux picked up all violations.  
+
+The audit log was searched through to find the violations using the following command.  
+`sudo ausearch -m avc | audit2allow`
+
+The select violations that were related to the 2 containers were added to the respective policies and the permissive setting was removed before being tested. This lead to the containers failing to work properly.  
+
+Having another look at the SELinux audit log in /var/log/audit/audit.log manually and testing with and without permissive enabled suggested that SELinux was still stopping the containers from performing certain actions but that the policy violations weren't being logged.  
+
+After looking on the internet I found the following post <https://serverfault.com/questions/545190/rhel6-selinux-not-logging-avc-denial-messages> (Oct. 2013) [Accessed 18/05/2020] that suggested that in the default SELinux policy on RedHat linux there are some rules that prevent certain types of policy violations from being written to the audit log.
+
+By running the following command suggested in the answer post, I was able to get a few more SELinux rules that were required and added them to policy.  
+`sudo semodule --disable_dontaudit --build`  
+
+Finally when running with everything together the SELinux policy stopped an action that was performed by the runc program to start the docker container with the seccomp profile applied and the no-new-privileges flag. This lead to the addition of the final nnp_transition rule in both SELinux policies.  
+
+## References
+
+*Mrunal Patel March 2016, Added no-new-privileges Security Flag to Docker, viewed 15/05/2020 <https://www.projectatomic.io/blog/2016/03/no-new-privs-docker/>* 
+
+*Aaron Killi 2017, 10 Strace Commands for Troubleshooting the Debugging Linux Process, TecMint, viewed 05/05/2020 <https://www.tecmint.com/strace-commands-for-troubleshooting-and-debugging-linux/>*  
+
+*jpallen 2016, Docker fails to start container if certain syscalls are restricted by seccomp, GitHub, viewed 10/05/2020 <https://github.com/moby/moby/issues/22252>*  
+
+*ihac 2017, Unable to get the complete syscall list of container, GitHub, viewed 12/05/2020 <https://github.com/draios/sysdig/issues/840>*  
+
+*Andreas Jaekel 2019, Filtering System Calls in Docker and Kubernetes, jax LONDON, viewed 15/05/2020 <https://jaxlondon.com/wp-content/uploads/2019/11/Security_-_Filtering_System_Calls_in_Docker_and_Kubernetes.pdf>*  
+
+*lairtech Oct. 2013, RHEL6: Selinux not logging AVC denial messages, viewed 16/05/2020 <https://serverfault.com/questions/545190/rhel6-selinux-not-logging-avc-denial-messages>* 

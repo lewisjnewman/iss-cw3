@@ -1,0 +1,23 @@
+policy_module(docker_mysql,1.0)
+
+virt_sandbox_domain_template(docker_mysql);
+
+require {
+    type mysqld_port_t;
+    type node_t;
+    type sysfs_t;
+    type container_runtime_t;
+}
+
+allow docker_mysql_t mysqld_port_t:tcp_socket name_bind;
+allow docker_mysql_t node_t:tcp_socket node_bind;
+allow docker_mysql_t self:capability { dac_override setgid setuid };
+allow docker_mysql_t self:tcp_socket { accept bind create getattr listen setopt shutdown };
+allow docker_mysql_t sysfs_t:file { open read };
+allow docker_mysql_t self:tcp_socket { read write };
+allow docker_mysql_t sysfs_t:dir read;
+allow docker_mysql_t sysfs_t:file getattr;
+
+allow container_runtime_t docker_mysql_t:process2 nnp_transition;
+
+#permissive docker_database_t;

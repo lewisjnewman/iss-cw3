@@ -7,7 +7,7 @@ docker build ../builds/webserver --tag webserver_i
 
 
 #slim the webserver container
-./docker-slim/docker-slim build --target nginx_server_i --http-probe --tag webserver_si --include-path='/var/run' --include-path='/var/log/nginx' --include-path='/var/cache/nginx' --include-path='/etc/passwd' --include-path='/etc/group' --include-path='/lib/*/libnss*' --include-path='/var/lib/nginx' --http-probe-cmd-file=probecmd.json --include-path='/usr/share/nginx'
+./docker-slim/docker-slim build --target webserver_i --http-probe --tag webserver_si --include-path='/var/run' --include-path='/var/log/nginx' --include-path='/var/cache/nginx' --include-path='/etc/passwd' --include-path='/etc/group' --include-path='/lib/*/libnss*' --include-path='/var/lib/nginx' --http-probe-cmd-file=probecmd.json --include-path='/usr/share/nginx'
 
 
 #slim the mysql container

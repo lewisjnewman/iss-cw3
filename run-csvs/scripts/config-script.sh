@@ -12,11 +12,11 @@ docker run -d  -v mysql_volume:/var/lib/mysql/ --net iss-cw3_net --ip 192.0.2.3 
 sleep 20
 
 #setup the database
-docker exec -i database_c mysql -uroot -ptest data < ../runs/mysql/data.sql
+docker exec -i mysql_c mysql -uroot -ptest data < ../runs/mysql/data.sql
 
 #stop and remove the temporary mysql container
-docker stop database_c
-docker rm database_c
+docker stop mysql_c
+docker rm mysql_c
 
 #change into the mysql directory to build the selinux policy
 cd ../runs/mysql

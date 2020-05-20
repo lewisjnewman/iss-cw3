@@ -7,7 +7,7 @@ SELinux and Extra bits created by Lewis Newman (1824952)
 
 ## Instructions for running
 
-**In order for the config-script to compile and load SELinux policies, The script should be run as root**
+In order for the config-script to compile and load SELinux policies, The script should be run as root. If the user running the script is not part of the docker group then both scripts should be run as root.
 
 ## Extra bits
 
@@ -109,7 +109,7 @@ Finally when running with everything together the SELinux policy stopped an acti
 
 ## References
 
-*Mrunal Patel March 2016, Added no-new-privileges Security Flag to Docker, viewed 15/05/2020 <https://www.projectatomic.io/blog/2016/03/no-new-privs-docker/>* 
+*Mrunal Patel March 2016, Added no-new-privileges Security Flag to Docker, viewed 15/05/2020 <https://www.projectatomic.io/blog/2016/03/no-new-privs-docker/>*
 
 *Aaron Killi 2017, 10 Strace Commands for Troubleshooting the Debugging Linux Process, TecMint, viewed 05/05/2020 <https://www.tecmint.com/strace-commands-for-troubleshooting-and-debugging-linux/>*  
 
@@ -119,4 +119,4 @@ Finally when running with everything together the SELinux policy stopped an acti
 
 *Andreas Jaekel 2019, Filtering System Calls in Docker and Kubernetes, jax LONDON, viewed 15/05/2020 <https://jaxlondon.com/wp-content/uploads/2019/11/Security_-_Filtering_System_Calls_in_Docker_and_Kubernetes.pdf>*  
 
-*lairtech Oct. 2013, RHEL6: Selinux not logging AVC denial messages, viewed 16/05/2020 <https://serverfault.com/questions/545190/rhel6-selinux-not-logging-avc-denial-messages>* 
+*lairtech Oct. 2013, RHEL6: Selinux not logging AVC denial messages, viewed 16/05/2020 <https://serverfault.com/questions/545190/rhel6-selinux-not-logging-avc-denial-messages>*

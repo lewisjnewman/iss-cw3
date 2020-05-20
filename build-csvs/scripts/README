@@ -1,0 +1,42 @@
+# University of Warwick - ISS CW3 20/05/2020
+
+This file contains instructions and information on building the stripped images
+
+Stripping performed by Lewis (1824952)
+
+## Docker Slim
+
+docker-slim is a tool for stripping containers by removing unneeded files that aren't being used from the container. Docker slim was used to help strip both containers to make them smaller than the full size images they are based on and therefore reduce disk space usage. A side effect of removing as many applications as possible is that if a malicious actor were to gain remote access inside the docker container there are very few tools he can use.
+
+docker-slim also has the capability to create seccomp profiles for the container however from testing it it doesn't work well enough and as a team we decided to use strace and create the seccomp profile manually from the list of function calls provided by the strace program.
+
+docker-slim works by creating a docker container of the image you specify and running it looking at what files get used by the docker container while it is running. This allows it to work out which files it can get rid of such that the container still works.
+
+If docker-slim removes too many files such that the container no longer runs then these files can be explicitly included by use of the following flags provided by docker-slim  
+
+```
+--include-path - Include directory or file from image [zero or more] (optionally overwriting the artifact's permissions, user and group information; format: target:octalPermFlags#uid#gid ; see the non-default USER FAQ section for more details)
+
+--include-path-file - Load directory or file includes from a file (optionally overwriting the artifact's permissions, user and group information; format: target:octalPermFlags#uid#gid ; see the non-default USER FAQ section for more details)
+
+--include-bin value - Include binary from image (executable or shared object using its absolute path)
+
+--include-bin-file - Load shared binary file includes from a file (similar to --include-path-file)
+
+--include-exe value - Include executable from image (by executable name)
+
+--include-exe-file - Load executable file includes from a file (similar to --include-path-file)
+
+--include-shell - Include basic shell functionality (default: false)
+```
+*docker-slim <https://github.com/docker-slim/docker-slim> Accessed 01/05/2020*
+
+docker-slim also provides functionality to automatically test http endpoints on the docker container. This functionality was used in order to access the endpoints on the webserver image as they would be used in real use.  
+
+The http methods used and the data that is sent with them are described in the `probecmd.json` file.
+
+For the nginx image the http probe wasn't used and the needed directories and files that were not included by docker-slim were added using the above include commands. The were required files were derived by trial and error and looking at error messages outputted when running the container interactively.
+
+## References
+
+*docker-slim <https://github.com/docker-slim/docker-slim> Accessed 01/05/2020*
